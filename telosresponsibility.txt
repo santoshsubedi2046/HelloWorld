@@ -1,0 +1,9 @@
+Maintain installers using install4j, while adhering to application installation and configuration requirements
+Proactively work with application developers to determine application installation and deployment requirements, and ensure they are satisfied in a variety of environments and deployment types, including hosted and non-hosted deployments, cloud and on-premise environments
+Maintain and enhance existing CI/CD pipelines to improve development team productivity
+Administer and maintain existing internal software development infrastructure
+Administer and manage existing infrastructures such as Maven repository, SVN and Git repositories
+Administer and manage development VMs hosting CI/CD infrastructure
+Design and implementation of cloud-based deployment solutions for enterprise applications
+Be able to quickly ramp up on and assess technologies used in the application or to simplify deployment automation and monitoring
+Review deployment architectures and provide feedback on best practices and improvements on efficiency and cost
