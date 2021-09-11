@@ -1,0 +1,45 @@
+FROM registry.access.redhat.com/ubi7/ubi-init
+LABEL Remarks="Xacta360-EP Dockerfile"
+WORKDIR /home/xacta-admin/
+ENV container docker
+ADD apache-commons-daemon.rpm /tmp/apache-commons-daemon.rpm
+ADD apache-commons-daemon-jsvc.rpm /tmp/apache-commons-daemon-jsvc.rpm
+ADD java-1.8.0-openjdk-1.8.0.292.b10-1.el7_9.x86_64.rpm /tmp/java-1.8.0-openjdk-1.8.0.292.b10-1.el7_9.x86_64.rpm
+ADD java-1.8.0-openjdk-devel-1.8.0.292.b10-1.el7_9.x86_64.rpm /tmp/java-1.8.0-openjdk-devel-1.8.0.292.b10-1.el7_9.x86_64.rpm
+ADD java-1.8.0-openjdk-headless-1.8.0.292.b10-1.el7_9.x86_64.rpm /tmp/java-1.8.0-openjdk-headless-1.8.0.292.b10-1.el7_9.x86_64.rpm
+ADD ep-ecs.sh /home/xacta-admin/ep-ecs.sh
+ADD ep-upgrade-ecs.sh /home/xacta-admin/ep-upgrade-ecs.sh
+ADD ep-restore.sh /home/xacta-admin/ep-restore.sh
+ADD ep-upgrade-prep-ecs.sh /home/xacta-admin/ep-upgrade-prep-ecs.sh
+RUN yum install initscripts -y \
+        && yum update -y \
+        && yum install net-tools -y && yum -y clean all \
+        && yum install wget -y && yum -y clean all \
+        && yum install libffi-devel -y && yum -y clean all \
+        && yum install libffi -y && yum -y clean all \
+        && yum install /tmp/java-1.8.0-openjdk-headless-1.8.0.292.b10-1.el7_9.x86_64.rpm -y && yum -y clean all \
+        && yum install /tmp/java-1.8.0-openjdk-1.8.0.292.b10-1.el7_9.x86_64.rpm -y && yum -y clean all \
+        && yum install /tmp/java-1.8.0-openjdk-devel-1.8.0.292.b10-1.el7_9.x86_64.rpm -y && yum -y clean all \
+        && wget -P /tmp/ http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.46/bin/apache-tomcat-9.0.46.tar.gz && yum -y clean all \
+        && chown root:root /tmp/apache-tomcat-9.0.46.tar.gz && yum -y clean all \
+        && chmod 755 /tmp/apache-tomcat-9.0.46.tar.gz && yum -y clean all  \
+        && tar -xvzf /tmp/apache-tomcat-9.0.46.tar.gz -C /opt && yum -y clean all \
+        && mv /opt/apache-tomcat-9.0.46 /opt/tomcat && yum -y clean all \
+        && yum install /tmp/apache-commons-daemon.rpm -y && yum -y clean all \
+        && yum install /tmp/apache-commons-daemon-jsvc.rpm -y && yum -y clean all \
+        && groupadd tomcat && yum -y clean all \
+        && chmod g+rwx /opt/tomcat/* && yum -y clean all  \
+        && chmod +x /opt/tomcat/lib/* && yum -y clean all \
+        && mkdir /opt/Xacta /opt/Xacta/setup /opt/Xacta/setup/ep && yum -y clean all \
+        && chmod 755 /opt/Xacta /opt/Xacta/setup /opt/Xacta/setup/ep && yum -y clean all \
+        && chown root:root /opt/Xacta /opt/Xacta/setup /opt/Xacta/setup/ep && yum -y clean all \
+        && yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y && yum -y clean all \
+        && yum install jq -y && yum -y clean all \
+        && chmod +x /home/xacta-admin/ep-ecs.sh \
+        && chmod +x ep-upgrade-ecs.sh \
+        && chmod +x /home/xacta-admin/ep-upgrade-prep-ecs.sh \
+        && chmod +x /home/xacta-admin/ep-restore.sh
+ADD EP_install.rpm /opt/Xacta/setup/ep/EP_install.rpm
+RUN yum install /opt/Xacta/setup/ep/EP_install.rpm -y && yum -y clean all
+ADD ep-install.properties /opt/Xacta/xacta-ep/install.properties
+CMD [ "/sbin/init" ]
