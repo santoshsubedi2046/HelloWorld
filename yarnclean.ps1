@@ -1,5 +1,4 @@
 $filePath = "D:\runner\runner_status.txt"
-$cacheFolder = "D:\yarn_cache\0"
 $disk = "D:"
 
 # Function to calculate free disk space percentage
@@ -14,20 +13,33 @@ function Get-FreeDiskSpacePercentage {
     return $null
 }
 
+$cacheFolders = @(
+    "D:\yarn_cache\0",
+    "D:\yarn_cache\1",
+    "D:\yarn_cache\2",
+    "D:\yarn_cache"
+)
+
 # Check if the file exists
 if (Test-Path $filePath) {
     try {
         $content = Get-Content $filePath
         $freeSpacePercentage = Get-FreeDiskSpacePercentage
         if ($content -match "LOW_DISK_SPACE=true" -and $freeSpacePercentage -lt 25) {
-            # If both conditions are met, execute yarn cache clean command
-            Write-Host "Low disk space detected (Free space: $freeSpacePercentage%). Cleaning yarn cache..."
-            $yarnCleanProcess = Start-Process -FilePath "yarn" -ArgumentList "cache", "clean", "--cache-folder=$cacheFolder" -PassThru -Wait -NoNewWindow
-            $exitCode = $yarnCleanProcess.ExitCode
-            if ($exitCode -eq 0) {
-                Write-Host "Yarn cache cleaned successfully."
-            } else {
-                Write-Host "Yarn cache clean failed with exit code: $exitCode"
+            # If both conditions are met, clean yarn cache in specified folders
+            foreach ($cacheFolder in $cacheFolders) {
+                try {
+                    Write-Host "Cleaning yarn cache in folder: $cacheFolder"
+                    $yarnCleanProcess = Start-Process -FilePath "yarn" -ArgumentList "cache", "clean", "--cache-folder=$cacheFolder" -PassThru -Wait -NoNewWindow
+                    $exitCode = $yarnCleanProcess.ExitCode
+                    if ($exitCode -eq 0) {
+                        Write-Host "Yarn cache cleaned successfully in folder: $cacheFolder"
+                    } else {
+                        Write-Host "Yarn cache clean failed in folder: $cacheFolder with exit code: $exitCode"
+                    }
+                } catch {
+                    Write-Host "Error cleaning yarn cache in folder: $cacheFolder - $_.Exception.Message"
+                }
             }
         } else {
             if ($freeSpacePercentage -ge 25) {
