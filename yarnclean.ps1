@@ -30,7 +30,9 @@ if (Test-Path $filePath) {
             foreach ($cacheFolder in $cacheFolders) {
                 try {
                     Write-Host "Cleaning yarn cache in folder: $cacheFolder"
-                    $yarnCleanProcess = Start-Process -FilePath "yarn" -ArgumentList "cache", "clean", "--cache-folder=$cacheFolder" -PassThru -Wait -NoNewWindow
+                    $yarnCmdPath = "C:\node-v12.22.7\yarn.cmd"
+                    $yarnCleanProcess = Start-Process -FilePath "cmd.exe" -ArgumentList "/c $yarnCmdPath cache clean --cache-folder=$cacheFolder" -PassThru -Wait -NoNewWindow
+
                     $exitCode = $yarnCleanProcess.ExitCode
                     if ($exitCode -eq 0) {
                         Write-Host "Yarn cache cleaned successfully in folder: $cacheFolder"
