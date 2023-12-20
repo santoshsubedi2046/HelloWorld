@@ -10,8 +10,8 @@
 
     - name: Calculate Free Space in Percentage
       set_fact:
-        free_space_percent: "{{ (disk_space.stdout|int / 1e6) / (13.6e3)|round(2) }}"
+        free_space_percent: "{{ (disk_space.stdout | int / 1e6) / (13.1 * 1e6) * 100 | round(2) }}"
 
     - name: Check Free Space and Run Yarn Cache Clean
-      when: free_space_percent < 50
+      when: free_space_percent | float < 50
       win_shell: yarn cache clean -cache-folder="D:\\yarn_cache\\0"
