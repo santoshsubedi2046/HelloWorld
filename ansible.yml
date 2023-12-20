@@ -20,7 +20,16 @@
       debug:
         msg: "Free space on D drive: {{ free_space_percent }}%"
 
-    - name: Check Free Space and Run Yarn Cache Clean
+    - name: Define Yarn Cache Folders
+      set_fact:
+        yarn_cache_folders:
+          - "D:\\yarn_cache\\0"
+          - "D:\\yarn_cache\\1"
+          # Add more cache folders as needed
+
+    - name: Check Free Space and Run Yarn Cache Clean on Multiple Folders
       when: free_space_percent | float < 50
-      win_shell: yarn cache clean -cache-folder="D:\\yarn_cache\\0"
+      loop: "{{ yarn_cache_folders }}"
+      win_shell: yarn cache clean -cache-folder="{{ item }}"
+
 
