@@ -1,0 +1,17 @@
+---
+- name: Check Disk Space and Run Yarn Cache Clean if Less Than 50%
+  hosts: your_windows_host
+  gather_facts: no
+
+  tasks:
+    - name: Get Disk Space on D drive
+      win_shell: Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceID='D:'" | Select-Object -ExpandProperty FreeSpace
+      register: disk_space
+
+    - name: Calculate Free Space in Percentage
+      set_fact:
+        free_space_percent: "{{ (disk_space.stdout|int / 1e6) / (13.6e3)|round(2) }}"
+
+    - name: Check Free Space and Run Yarn Cache Clean
+      when: free_space_percent < 50
+      win_shell: yarn cache clean -cache-folder="D:\\yarn_cache\\0"
