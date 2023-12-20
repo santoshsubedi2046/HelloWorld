@@ -4,13 +4,17 @@
   gather_facts: no
 
   tasks:
-    - name: Get Disk Space on D drive
-      win_shell: Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceID='D:'" | Select-Object -ExpandProperty FreeSpace
-      register: disk_space
+    - name: Get Free Space on D drive
+      win_shell: '[math]::Round((Get-PSDrive D).Free/1GB,2)'
+      register: free_space
 
-    - name: Calculate Free Space in Percentage
+    - name: Get Used Space on D drive
+      win_shell: '[math]::Round((Get-PSDrive D).Used/1GB,2)'
+      register: used_space
+
+    - name: Calculate Free Space Percentage
       set_fact:
-        free_space_percent: "{{ (disk_space.stdout | int * 100) / (13.1 * 1e9) | round(2) }}"
+        free_space_percent: "{{ ((free_space.stdout | float) / ((free_space.stdout | float) + (used_space.stdout | float))) * 100 | round(2) }}"
 
     - name: Debug Free Space Percentage
       debug:
@@ -19,3 +23,4 @@
     - name: Check Free Space and Run Yarn Cache Clean
       when: free_space_percent | float < 50
       win_shell: yarn cache clean -cache-folder="D:\\yarn_cache\\0"
+
