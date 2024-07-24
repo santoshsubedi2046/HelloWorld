@@ -1,7 +1,7 @@
 include:
   - project: 'gitlab-common'
     ref: 'main'
-    file: 'core-app-version.yml' # Assuming this file contains the required variables
+    file: 'core-app-version.yml' # External variable definitions
 
 Set_Vars:
   stage: set_variables
@@ -13,6 +13,8 @@ Set_Vars:
       if [[ "$LOGIN_APPS_ALIAS" == "n-login-apps" && "$WL_ASSETS_ALIAS" == "n-wl-assets" ]]; then
         echo "LOGIN_APPS_VERSION=$login_apps_apps" >> .env
         echo "WL_ASSETS_VERSION=$wl_assets_version" >> .env
+        echo "LOGIN_APPS_ARTIFACT_ID=$login_apps_artifact_id" >> .env
+        echo "WL_ASSETS_ARTIFACT_ID=$wl_assets_artifact_id" >> .env
       else
         echo "Error: Unknown alias configuration"
         exit 1
@@ -24,32 +26,48 @@ Set_Vars:
     paths:
       - .env
 
-Build_Stage:
-  stage: build
+.cdn_deploy:
+  # Define common setup here that should be shared
   script:
-    - source .env
+    - |
+      # Source the .env file to load environment variables
+      source .env
+      
+      # Debugging: Echo current values
+      echo "CDN Deployment Preparation"
+      echo "Artifact_ID: $Artifact_ID"
+      echo "LOGIN_APPS_VERSION: $LOGIN_APPS_VERSION"
+      echo "WL_ASSETS_VERSION: $WL_ASSETS_VERSION"
+
+      # Set Artifact_version based on Artifact_ID
+      if [[ "$Artifact_ID" == "nxn-login-apps" ]]; then
+        Artifact_version="$LOGIN_APPS_VERSION"
+        echo "Setting Artifact_version for Login Apps: $Artifact_version"
+      elif [[ "$Artifact_ID" == "nxn-wl-assets" ]]; then
+        Artifact_version="$WL_ASSETS_VERSION"
+        echo "Setting Artifact_version for WL Assets: $Artifact_version"
+      else
+        echo "Error: Unknown Artifact_ID $Artifact_ID"
+        exit 1
+      fi
+
+      # Use the determined Artifact_version for deployment
+      echo "Deploying to CDN with artifact ID $Artifact_ID and version $Artifact_version"
+      # Add actual deployment commands here
+
+    - echo "CDN deployment completed."
+
+'Deploy login apps to QA':
+  stage: deploy
+  extends: .cdn_deploy
+  dependencies:
+    - Set_Vars
+  before_script:
+    - source .env  # Ensure .env is sourced to set environment variables
     - echo "Using WL Assets Version: $WL_ASSETS_VERSION"
     - echo "Using Login Apps Version: $LOGIN_APPS_VERSION"
-    # Add your build commands here
-  dependencies:
-    - Set_Vars
-
-Test_Stage:
-  stage: test
-  script:
-    - source .env
-    - echo "Testing with WL Assets Version: $WL_ASSETS_VERSION"
-    - echo "Testing with Login Apps Version: $LOGIN_APPS_VERSION"
-    # Add your test commands here
-  dependencies:
-    - Set_Vars
-
-Deploy_Stage:
-  stage: deploy
-  script:
-    - source .env
-    - echo "Deploying with WL Assets Version: $WL_ASSETS_VERSION"
-    - echo "Deploying with Login Apps Version: $LOGIN_APPS_VERSION"
-    # Add your deployment commands here
-  dependencies:
-    - Set_Vars
+  variables:
+    Artifact_ID: "${LOGIN_APPS_ARTIFACT_ID}"
+    # Artifact_version is determined in the script, not declared here
+  after_script:
+    - echo "Deployment to QA completed."
