@@ -1,0 +1,55 @@
+include:
+  - project: 'gitlab-common'
+    ref: 'main'
+    file: 'core-app-version.yml' # Assuming this file contains the required variables
+
+Set_Vars:
+  stage: set_variables
+  tags:
+    - jdk11
+  script:
+    - |
+      # Check and set versions based on alias conditions
+      if [[ "$LOGIN_APPS_ALIAS" == "n-login-apps" && "$WL_ASSETS_ALIAS" == "n-wl-assets" ]]; then
+        echo "LOGIN_APPS_VERSION=$login_apps_apps" >> .env
+        echo "WL_ASSETS_VERSION=$wl_assets_version" >> .env
+      else
+        echo "Error: Unknown alias configuration"
+        exit 1
+      fi
+    - cat .env  # Display the .env file for debugging purposes
+  rules:
+    - when: always
+  artifacts:
+    paths:
+      - .env
+
+Build_Stage:
+  stage: build
+  script:
+    - source .env
+    - echo "Using WL Assets Version: $WL_ASSETS_VERSION"
+    - echo "Using Login Apps Version: $LOGIN_APPS_VERSION"
+    # Add your build commands here
+  dependencies:
+    - Set_Vars
+
+Test_Stage:
+  stage: test
+  script:
+    - source .env
+    - echo "Testing with WL Assets Version: $WL_ASSETS_VERSION"
+    - echo "Testing with Login Apps Version: $LOGIN_APPS_VERSION"
+    # Add your test commands here
+  dependencies:
+    - Set_Vars
+
+Deploy_Stage:
+  stage: deploy
+  script:
+    - source .env
+    - echo "Deploying with WL Assets Version: $WL_ASSETS_VERSION"
+    - echo "Deploying with Login Apps Version: $LOGIN_APPS_VERSION"
+    # Add your deployment commands here
+  dependencies:
+    - Set_Vars
