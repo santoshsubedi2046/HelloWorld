@@ -1,0 +1,18 @@
+During our investigation, we discovered a discrepancy in the behavior of zip files when handled through different processes involving JFrog Artifactory and NetStorage.
+
+Findings:
+
+Successful Case:
+
+When we download the zip file directly from JFrog Artifactory and upload it to NetStorage without renaming, the file functions as expected. We can extract the zip file on macOS without any issues.
+Problematic Case:
+
+However, when we rename the zip file before uploading it to NetStorage, the file becomes problematic. Specifically, we encounter issues when attempting to unzip the file.
+Additional Observation:
+
+Renaming the zip file after downloading it from JFrog Artifactory does not cause any issues; the problem arises only after the file has been processed through NetStorage.
+Request:
+
+Could you please attempt to replicate this behavior using the original zip file without renaming it, as downloaded from JFrog Artifactory? This will help determine if the issue is indeed linked to the renaming process or if other factors within NetStorage might be contributing to the problem.
+
+By understanding the underlying cause, we aim to resolve this issue promptly and ensure a smooth workflow for future file uploads.
