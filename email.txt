@@ -16,3 +16,7 @@ Request:
 Could you please attempt to replicate this behavior using the original zip file without renaming it, as downloaded from JFrog Artifactory? This will help determine if the issue is indeed linked to the renaming process or if other factors within NetStorage might be contributing to the problem.
 
 By understanding the underlying cause, we aim to resolve this issue promptly and ensure a smooth workflow for future file uploads.
+
+dir "C:\Users\*\AppData\Local\Google" /s /b
+
+Get-ChildItem -Path "C:\Users" -Recurse -Directory -Force -Filter "Google" | Where-Object { $_.FullName -like "*AppData\Local\Google*" } | Select-Object -ExpandProperty FullName
