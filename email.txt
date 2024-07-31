@@ -19,4 +19,10 @@ By understanding the underlying cause, we aim to resolve this issue promptly and
 
 dir "C:\Users\*\AppData\Local\Google" /s /b
 
-Get-ChildItem -Path "C:\Users" -Recurse -Directory -Force -Filter "Google" | Where-Object { $_.FullName -like "*AppData\Local\Google*" } | Select-Object -ExpandProperty FullName
+Get-ChildItem -Path "C:\Users" -Directory -Force | ForEach-Object {
+    $googlePath = "$($_.FullName)\AppData\Local\Google"
+    if (Test-Path -Path $googlePath) {
+        Write-Output $googlePath
+    }
+}
+
